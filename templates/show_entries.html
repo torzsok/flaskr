@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block body %}
-  {% if g.user %}
+  {% if session.logged_in %}
     <form action="{{ url_for('add_entry') }}" method="post" class="add-entry">
       <dl>
         <dt>Title:
@@ -15,7 +15,7 @@
   {% endif %}
   <ul class="entries">
   {% for entry in entries %}
-    <li><h2>{{ entry.title }} by {{ entry.author }}</h2>{{ entry.text|safe }}</li>
+    <li><h2>{{ entry.title }} by {{ entry.author.username }}</h2>{{ entry.text|safe }}</li>
   {% else %}
     <li><em>Unbelievable.  No entries here so far</em></li>
   {% endfor %}
