@@ -70,7 +70,7 @@ def after_request(response):
 @app.route('/')
 def show_entries():
     entries = Entry.select().join(Author)
-    return render_template('show_entries.html', entries=entries)
+    return render_template('index.html', entries=entries)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -109,16 +109,17 @@ def register():
     return render_template('register.html')
 
 
-@app.route('/add', methods=['POST'])
+@app.route('/', methods=['POST', 'GET'])
 def add_entry():
     if not session['logged_in']:
-        return redirect(url_for('show_entries'))
+        return redirect(url_for('login'))
 
     entry = Entry.create(title = request.form['title'],
                          text = request.form['text'],
                          category = request.form['category'],
                          author = Author.get(username=session['username']))
     flash('New entry was successfully posted')
+
     return redirect(url_for('show_entries'))
 
 
