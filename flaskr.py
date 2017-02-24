@@ -10,7 +10,8 @@
     :license: BSD, see LICENSE for more details.
 """
 
-from flask import Flask, request, session, g, redirect, url_for, render_template, flash
+from flask import Flask, session, g, redirect, url_for, render_template, flash, jsonify
+from flask_restful import Resource, Api, request
 from peewee import *
 from werkzeug import check_password_hash, generate_password_hash
 
@@ -128,4 +129,31 @@ def logout():
     session.pop('logged_in', None)
     flash('You were logged out')
     return redirect(url_for('show_entries'))
+
+"""The REST part"""
+
+api = Api(app)
+
+class Blogposts(Resource):
+     def get(self, **kwargs):
+        rv=[]
+        if 'author' in kwargs:
+           entries = Entry.select().join(Author).where(Author.username == kwargs['author'])
+        elif 'category' in kwargs:
+           entries = Entry.select().where(Entry.category == kwargs['category'])
+        else:
+           entries = Entry.select()
+
+        for entry in entries:
+           rv.append([entry.author.username, entry.category, entry.text])
+
+        return jsonify(rv)
+
+api.add_resource(Blogposts, '/category/<string:category>',
+                            '/author/<string:author>',
+                            '/all')
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
 
