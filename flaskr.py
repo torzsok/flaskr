@@ -1,13 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-    Flaskr
-    ~~~~~~
 
-    A microblog example application written as Flask tutorial with
-    Flask and sqlite3.
-
-    :copyright: (c) 2015 by Armin Ronacher.
-    :license: BSD, see LICENSE for more details.
 """
 
 from flask import Flask, session, g, redirect, url_for, render_template, flash, jsonify
@@ -42,7 +35,7 @@ db.create_tables([Author, Entry], safe = True)
 
 
 # configuration
-DATABASE = 'verynewflaskr.db'
+#DATABASE = 'verynewflaskr.db'
 PER_PAGE = 30
 DEBUG = True
 SECRET_KEY = 'development key'
@@ -137,6 +130,10 @@ api = Api(app)
 class Blogposts(Resource):
      def get(self, **kwargs):
         rv=[]
+#        parser = reqparse.RequestParser()
+#        parser.add_argument('callback', False)
+#        callback = parser.parse_args()
+        callback = request.get_json()
         if 'author' in kwargs:
            entries = Entry.select().join(Author).where(Author.username == kwargs['author'])
         elif 'category' in kwargs:
@@ -145,9 +142,12 @@ class Blogposts(Resource):
            entries = Entry.select()
 
         for entry in entries:
-           rv.append([entry.author.username, entry.category, entry.text])
+           rv.append({'author': entry.author.username,
+                      'category': entry.category,
+                      'text': entry.text})
 
-        return jsonify(rv)
+        return jsonify('{0}({1})'.format(callback, rv))
+        #return "%s({'a':1, 'b':2 })"
 
 api.add_resource(Blogposts, '/category/<string:category>',
                             '/author/<string:author>',
@@ -155,5 +155,5 @@ api.add_resource(Blogposts, '/category/<string:category>',
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, ssl_context='adhoc')
 
