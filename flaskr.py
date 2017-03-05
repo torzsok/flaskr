@@ -5,6 +5,8 @@
 
 from flask import Flask, session, g, redirect, url_for, render_template, flash, jsonify
 from flask_restful import Resource, Api, request
+#reqparse
+#from flask_restful import reqparse
 from peewee import *
 from werkzeug import check_password_hash, generate_password_hash
 
@@ -127,13 +129,21 @@ def logout():
 
 api = Api(app)
 
+#
+#parser = reqparse.RequestParser()
+#parser.add_argument('callback', False)
+#parser.add_argument('author', False)
+#parser.add_argument('category', False)
+
+
 class Blogposts(Resource):
-     def get(self, **kwargs):
+     def get(self, **author):
+        callback = request.get_json('callback')
+        rv = {'author': 'jim'}
+        return jsonify('{0}({1})'.format(callback, rv))
+
+        #return jsonify(author, callback)
         rv=[]
-#        parser = reqparse.RequestParser()
-#        parser.add_argument('callback', False)
-#        callback = parser.parse_args()
-        callback = request.get_json()
         if 'author' in kwargs:
            entries = Entry.select().join(Author).where(Author.username == kwargs['author'])
         elif 'category' in kwargs:
@@ -146,14 +156,12 @@ class Blogposts(Resource):
                       'category': entry.category,
                       'text': entry.text})
 
-        return jsonify('{0}({1})'.format(callback, rv))
-        #return "%s({'a':1, 'b':2 })"
+        return jsonify('{0}({1}'.format(callback, rv))
 
 api.add_resource(Blogposts, '/category/<string:category>',
                             '/author/<string:author>',
                             '/all')
 
-
 if __name__ == '__main__':
-    app.run(debug=True, ssl_context='adhoc')
+    app.run(debug=True)
 
