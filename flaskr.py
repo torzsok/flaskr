@@ -135,10 +135,6 @@ parser.add_argument('callback', False)
 class Blogposts(Resource):
      def get(self, **kwargs):
         callback=parser.parse_args()['callback']
-        rv = {'author': 'jim'}
-        return jsonify('{0}({1})'.format(callback, rv))
-
-        #return jsonify(author, callback)
         rv=[]
         if 'author' in kwargs:
            entries = Entry.select().join(Author).where(Author.username == kwargs['author'])
